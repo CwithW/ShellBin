@@ -1,0 +1,14 @@
+version: '2.4'
+services:
+  shellapp:
+    build: ./docker
+    ports:
+      - "127.0.0.1:8023:3000"
+      - "9999:3001"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - TZ=Asia/Shanghai
+    mem_limit: 300M
+    restart: unless-stopped
