@@ -1,11 +1,22 @@
 <template>
   <div class="about">
     <div class="console" id="terminal" ref="terminal"></div>
-    <div class="options hidden"></div>
+    <div class="options">
+      <button>RemoteSettings</button>
+      <label><input type="checkbox" v-model="config.sendSttyOnResize"/>SendSttyOnResize</label>
+      <button @click="gainPty()">GainPty</button>
+      <button @click="setSttySize()">SetSttySize</button>
+    </div>
   </div>
 </template>
 
 <style scoped>
+label{
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
 .hidden{
   display: none;
 }
@@ -30,6 +41,8 @@
   left: 0;
   background: gainsboro;
   overflow-x: auto;
+  display: flex;
+  flex-direction: row;
 }
 </style>
 <script lang="ts">
@@ -53,6 +66,9 @@ export default {
       windowResizeListener: undefined as (() => void)|undefined,
       fitAddon: undefined as FitAddon|undefined,
       resizeTimer: undefined as number|undefined,
+      config:{
+        sendSttyOnResize: false,
+      }
     }
   },
   methods: {
@@ -86,12 +102,29 @@ export default {
         }
       });
       this.terminal.open(document.getElementById('terminal')!);
+      this.terminal.onResize((size) => {
+        this.rows = size.rows;
+        this.cols = size.cols;
+        console.log("resized", size);
+        // change pty size
+        if(this.config.sendSttyOnResize){
+          this.socket?.send(`stty rows ${size.rows} cols ${size.cols}\n`);
+        }
+      });
       const fitAddon = new FitAddon();
       this.terminal.loadAddon(fitAddon);
       fitAddon.fit();
       this.fitAddon = fitAddon;
       const attachAddon = new AttachAddon(this.socket!);
       this.terminal.loadAddon(attachAddon);
+    },
+    gainPty() {
+      this.socket?.send(`python -c 'import pty; pty.spawn("/bin/bash")'\n`);
+      this.terminal?.focus();
+    },
+    setSttySize() {
+      this.socket?.send(`stty rows ${this.rows} cols ${this.cols}\n`);
+      this.terminal?.focus();
     }
   },
   mounted() {
