@@ -1,16 +1,35 @@
 <template>
   <div class="about">
-    <div class="console" id="terminal"></div>
+    <div class="console" id="terminal" ref="terminal"></div>
+    <div class="options hidden"></div>
   </div>
 </template>
 
 <style scoped>
-.console {
+.hidden{
+  display: none;
+}
+.about{
   width: 100%;
   height: 100%;
+  display:flex;
+  flex-direction: column;
+}
+.console {
+  width: 100%;
+  height: calc(100% - 20px);
   position: absolute;
   top: 0;
   left: 0;
+}
+.options {
+  width: 100%;
+  height: 20px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background: gainsboro;
+  overflow-x: auto;
 }
 </style>
 <script lang="ts">
@@ -19,6 +38,9 @@ import "xterm/css/xterm.css";
 import { FitAddon } from 'xterm-addon-fit';
 import { AttachAddon } from 'xterm-addon-attach';
 import axios from '@/axios';
+
+// https://blog.51cto.com/hequan/3712190
+
 export default {
   name: 'About',
   data() {
@@ -27,7 +49,10 @@ export default {
       terminal: undefined as Terminal|undefined,
       socket: undefined as WebSocket|undefined,
       rows: 40,
-      cols: 10
+      cols: 10,
+      windowResizeListener: undefined as (() => void)|undefined,
+      fitAddon: undefined as FitAddon|undefined,
+      resizeTimer: undefined as number|undefined,
     }
   },
   methods: {
@@ -42,9 +67,10 @@ export default {
       }
       this.socket.onclose = () => {
         console.log("socket close")
+        this.terminal?.writeln("\nWebsocket Closed")
       }
-      this.socket.onerror = () => {
-        console.log("socket error")
+      this.socket.onerror = (e) => {
+        console.log("socket error",e)
       }
     },
     initTerm(){
@@ -63,20 +89,30 @@ export default {
       const fitAddon = new FitAddon();
       this.terminal.loadAddon(fitAddon);
       fitAddon.fit();
+      this.fitAddon = fitAddon;
       const attachAddon = new AttachAddon(this.socket!);
       this.terminal.loadAddon(attachAddon);
-      this.terminal.onData((data) => {
-        console.log(encodeURIComponent(data))
-      });
     }
   },
   mounted() {
     this.id = this.$route.params.id as string;
     this.initSocket();
+    this.windowResizeListener = () => {
+      this.resizeTimer && clearTimeout(this.resizeTimer);
+      this.resizeTimer = setTimeout(()=>{
+        this.fitAddon?.fit();
+      }, 100);
+    }
+    window.addEventListener('resize', this.windowResizeListener);
   },
   unmounted() {
     this.socket?.close();
     this.terminal?.dispose();
+    this.socket = undefined;
+    this.terminal = undefined;
+    this.fitAddon = undefined;
+    window.removeEventListener('resize', this.windowResizeListener!);
+    this.windowResizeListener = undefined;
   },
 }
 
