@@ -1,8 +1,12 @@
 # ShellBin
 
+[中文文档](README_zh.md)
+
 Elegantly receive reverse shell.
 
 Receive multiple reverse shells on one port, and manage them in a web UI.
+
+vi, tmux commands even works ( you may need to gain pty. )
 
 ![screenshot](images/screenshot.png)
 
@@ -44,10 +48,10 @@ pull requests are welcome.
 
 ## Roadmap
 
-- [x] web UI authentication
+- [x] web UI with list of connected shells and using [xterm.js](https://xtermjs.org/) to display colored shell
+- [x] authentication required for web UI
 - [x] receive reverse shell
 - [x] automatically remove dead connections
-
 - [ ] fancy web UI
-- [ ] resize terminal and send event
-- [ ] snippets
+- [ ] resize terminal and send terminal event (currently you need to do `stty` command)
+- [ ] snippets ( eg. `find / -perm 4000 2>/dev/null` )
