@@ -15,7 +15,15 @@
 </style>
 <script lang="ts">
 export default {
-  name: 'Index'
+  name: 'Index',
+  mounted() {
+    let token = localStorage.getItem('token')
+    if(!token) {
+      this.$router.push('/login')
+    } else {
+      this.$router.push('/list')
+    }
+  },
 }
 
 </script>

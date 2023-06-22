@@ -2,4 +2,6 @@ node_modules
 
 dist
 
-docker/docker/app
+/docker/config/
+/docker/data/
+/docker/docker/app

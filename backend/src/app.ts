@@ -1,8 +1,13 @@
 import express from 'express';
 import expressWs = require('express-ws');
+import * as md5 from 'md5';
 import { connections, findConnectionById } from './socket';
+import {getConfig} from './config';
 let app = expressWs(express()).app;
 
+
+app.use(express.urlencoded())
+app.use(express.json())
 app.use(express.static('public'));
 // cors
 app.use((req, res, next) => {
@@ -11,12 +16,24 @@ app.use((req, res, next) => {
 });
 
 
+let config = getConfig();
+
+const token = getToken();
+function getToken(){
+    let str =  `SHELLBIN:${config.username}:${config.password}`
+    // sha256
+    return md5.default(str);
+}
+
 function requireAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
-    // TODO: implement authorization logic
-    if (req.headers && req.headers.authorization) {
+    if (req.headers && req.headers.authorization === token) {
         next();
     } else {
-        res.status(401).send('Unauthorized');
+        res.json({
+            code: 401,
+            message: "Unauthorized",
+            data: null
+        });
     }
 }
 
@@ -32,7 +49,30 @@ function bufferReplace(buf:Buffer, a:string, b:string|Uint8Array|Buffer):Buffer{
     return Buffer.concat([ before, b, after ], len);
   }
 
-app.get("/api/client/list", (req, res) => {
+
+app.post("/api/user/login", (req, res) => {
+    let username = req.body.username;
+    let password = req.body.password;
+    if (username === config.username && password === config.password) {
+        res.json({
+            code: 200,
+            message: "success",
+            data: getToken()
+        });
+        return;
+    }else{
+        res.json({
+            code: 500,
+            message: "Wrong username or password",
+            data: null
+        });
+        return;
+    }
+});
+
+
+
+app.get("/api/client/list",requireAuth, (req, res) => {
     res.json(connections.map((connection) => {
         return {
             id: connection.id,
@@ -84,7 +124,7 @@ app.ws("/api/client/:id", (ws, req) => {
     }
 });
 
-app.post("/api/client/:id/config", (req,res) => {
+app.post("/api/client/:id/config",requireAuth, (req,res) => {
     let id = req.params.id;
     let maybeUndefinedConnection = findConnectionById(id);
     if (maybeUndefinedConnection === undefined) {

@@ -1,6 +1,8 @@
 import * as net from 'net';
 import { EventEmitter } from 'events';
 import {v4 as uuid} from 'uuid';
+import { getConfig } from './config';
+const config = getConfig();
 export type Connection = {
     socket: net.Socket;
     id: string;
@@ -65,10 +67,11 @@ server.on('connection', (socket: net.Socket) => {
 
 
 function removeDeadConnections(){
+    if(config.removeDeadAfter === 0) return
     connections = connections.filter((connection) => {
         return connection.alive ||(
             // connection is dead for 1 days
-            Date.now() - connection.lastActive < 1000 * 60 * 60 * 24
+            Date.now() - connection.lastActive < (1000 * config.removeDeadAfter)
         );
     });
 }

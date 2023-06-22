@@ -3,7 +3,7 @@
     <h1>Connections</h1>
     <ul>
       <li v-for="client in clients" :key="client.id" @click="clickedOn(client)" class="connection">
-        {{ client.description }} - {{ client.alive }} - {{ client.lastActive }}
+        {{ client.description }} - {{ client.alive ? "Alive":"Dead" }} - {{ unixTimeToDate(client.lastActive) }}
       </li>
     </ul>
   </div>
@@ -32,6 +32,9 @@ export default {
     }
   },
   methods: {
+    unixTimeToDate(unixTime: number) {
+      return new Date(unixTime).toLocaleString();
+    },
     pollClients() {
       axios.get('/client/list').then((res) => {
         this.clients = res.data;

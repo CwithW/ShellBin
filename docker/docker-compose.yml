@@ -1,12 +1,14 @@
 version: '2.4'
 services:
-  shellapp:
+  shellbin:
     build: ./docker
+    image: shellbin
     ports:
-      - "127.0.0.1:8023:3000"
+      - "9998:3000"
       - "9999:3001"
     volumes:
       - ./data:/app/data
+      - ./config:/app/config:ro
     environment:
       - NODE_ENV=production
       - TZ=Asia/Shanghai

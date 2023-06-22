@@ -21,6 +21,7 @@ front:
 docker: clean backend front
 	cp -r backend/dist docker/docker/app
 	cp -r front/dist docker/docker/app/public
+	cp -r extra/config.yml.gen docker/config/config.yml
 
 clean:
 	rm -rf backend/dist
