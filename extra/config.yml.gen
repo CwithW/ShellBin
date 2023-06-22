@@ -1,0 +1,10 @@
+# the secret to keep your service private
+username: admin
+password: admin
+# the port you access the service with HTTP
+managePort: 3000
+# the port victims connect to
+shellPort: 3001
+# automatically remove connections that are dead X seconds ago. set to 0 to disable
+# default is 3600 seconds (1 hour)
+removeDeadAfter: 3600
