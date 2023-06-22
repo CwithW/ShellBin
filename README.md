@@ -17,7 +17,9 @@ make docker
 ```
 
 copy the `docker` folder to you VPS and run `docker compose up -d --build`.
+
 you may want to change `docker/config/config.yml` it contains the username and password (default is admin:admin).
+
 you may also want to change the ports in `docker/docker-compose.yml` (default is 9998:3000 and 9999:3001).
 
 
