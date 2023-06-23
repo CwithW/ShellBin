@@ -4,7 +4,7 @@
 
 在一个端口上接收多个反向 shell，并在 Web UI 中管理它们。
 
-甚至可以使用 vi、tmux 命令（您可能需要获得 pty）。
+甚至可以使用 vi、tmux 命令（您可能需要获得 pty 并设置正确的stty尺寸）。
 
 ![screenshot](images/screenshot.png)
 

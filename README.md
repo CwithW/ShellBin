@@ -6,7 +6,7 @@ Elegantly receive reverse shell.
 
 Receive multiple reverse shells on one port, and manage them in a web UI.
 
-vi, tmux commands even works ( you may need to gain pty. )
+vi, tmux commands even works ( you may need to gain pty, and set correct stty size. )
 
 ![screenshot](images/screenshot.png)
 
