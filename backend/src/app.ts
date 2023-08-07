@@ -5,6 +5,7 @@ import { connections, findConnectionById } from './socket';
 import {getConfig} from './config';
 let app = expressWs(express()).app;
 
+import WebSocket from 'ws';
 
 app.use(express.urlencoded())
 app.use(express.json())
@@ -15,6 +16,13 @@ app.use((req, res, next) => {
     next();
 });
 
+let websockets:WebSocket[] = [];
+
+let websocketPingInterval = setInterval(() => {
+    websockets.forEach((ws) => {
+        ws.ping();
+    });
+}, 1000 * 30);
 
 let config = getConfig();
 
@@ -93,6 +101,7 @@ app.ws("/api/client/:id", (ws, req) => {
         ws.close();
         return;
     }
+    websockets.push(ws);
     let connection = maybeUndefinedConnection
     ws.on('message', (message:Buffer) => {
         // xterm.js: replace CR with LF
@@ -115,6 +124,7 @@ app.ws("/api/client/:id", (ws, req) => {
     ws.on('close', () => {
         connection.socket.off('data', listener1);
         connection.socket.off('close', listener2);
+        websockets.splice(websockets.indexOf(ws), 1);
     });
     // send existing buffer to client for history
     connection.buffer.length > 0 && ws.send(connection.buffer);
