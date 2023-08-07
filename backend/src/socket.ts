@@ -35,6 +35,7 @@ let server = net.createServer();
 export let connections: Connection[] = [];
 
 server.on('connection', (socket: net.Socket) => {
+    socket.setKeepAlive(true, 1000 * 60 * 5);
     let connection:Connection = {
         socket,
         id:uuid(),
