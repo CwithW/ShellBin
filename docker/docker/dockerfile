@@ -1,9 +1,11 @@
 FROM node:lts-alpine
 
-copy ./app/package.json /app/package.json
+COPY ./app/package.json /app/package.json
 WORKDIR /app
 RUN npm install -g --registry=https://registry.npmmirror.com cnpm && cnpm install
 
-copy ./app /app
+COPY ./app /app
 
 CMD ["node", "main.js"]
+
+EXPOSE 3000 3001
