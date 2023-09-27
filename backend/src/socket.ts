@@ -1,6 +1,6 @@
 import * as net from 'net';
 import { EventEmitter } from 'events';
-import {v4 as uuid} from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { getConfig } from './config';
 const config = getConfig();
 export type Connection = {
@@ -36,10 +36,10 @@ export let connections: Connection[] = [];
 
 server.on('connection', (socket: net.Socket) => {
     socket.setKeepAlive(true, 1000 * 60 * 5);
-    let connection:Connection = {
+    let connection: Connection = {
         socket,
-        id:uuid(),
-        description: `${socket.remoteAddress!.replace(/^.*:/, '')}:${socket.remotePort}`,
+        id: uuid(),
+        description: `${socket.remoteAddress ? socket.remoteAddress!.replace(/^.*:/, '') : "unknown"}:${socket.remotePort}`,
         buffer: Buffer.alloc(0),
         alive: true,
         lastActive: Date.now(),
@@ -49,13 +49,13 @@ server.on('connection', (socket: net.Socket) => {
     socket.on('data', (data: Buffer) => {
         connection.buffer = Buffer.concat([connection.buffer, data]);
         // if the buffer is longer than 10240*2 bytes, trim it to 10240 bytes
-        if(connection.buffer.length > 10240 * 2){
+        if (connection.buffer.length > 10240 * 2) {
             connection.buffer = connection.buffer.slice(10240);
         }
         connection.lastActive = Date.now();
     });
     socket.on("error", (err) => {
-        connection.buffer = Buffer.concat([connection.buffer, Buffer.from("Error: "+err.message)]);
+        connection.buffer = Buffer.concat([connection.buffer, Buffer.from("Error: " + err.message)]);
         connection.alive = false;
         connection.lastActive = Date.now();
     });
@@ -67,10 +67,10 @@ server.on('connection', (socket: net.Socket) => {
 });
 
 
-function removeDeadConnections(){
-    if(config.removeDeadAfter === 0) return
+function removeDeadConnections() {
+    if (config.removeDeadAfter === 0) return
     connections = connections.filter((connection) => {
-        return connection.alive ||(
+        return connection.alive || (
             // connection is dead for 1 days
             Date.now() - connection.lastActive < (1000 * config.removeDeadAfter)
         );
@@ -78,7 +78,7 @@ function removeDeadConnections(){
 }
 let _timer: NodeJS.Timeout | undefined;
 
-export function start(){
+export function start() {
     server.listen(3001, () => {
         console.log('TCP server listening on port 3001');
     });
@@ -87,7 +87,7 @@ export function start(){
         removeDeadConnections();
     }, 1000 * 60);
 }
-export function stop(){
+export function stop() {
     server.listening && server.close();
     _timer !== undefined && clearInterval(_timer);
 }
