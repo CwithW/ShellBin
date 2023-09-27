@@ -19,13 +19,24 @@ front:
 	cd front && npm run build
 
 docker: clean backend front
-	cp -r backend/dist docker/docker/app
-	cp -r front/dist docker/docker/app/public
-	mkdir -p docker/config
-	cp -r extra/config.yml.gen docker/config/config.yml
+	cp -r backend/dist docker/app
+	cp -r front/dist docker/app/public
+	cp extra/config.yml.gen docker/app/config.yml.gen
+	cp extra/docker_entrypoint.sh docker/app/docker_entrypoint.sh
+	cp version docker/app/version
+
+VERSION:=$(shell cat version)
+build-docker-image: docker
+	docker build -t "cwithw/shellbin:$(VERSION)" docker
+	docker tag "cwithw/shellbin:$(VERSION)" "cwithw/shellbin:latest"
+
+push-docker: build-docker-image
+	docker push "cwithw/shellbin:$(VERSION)"
+	docker push "cwithw/shellbin:latest"
+
 
 clean:
 	rm -rf backend/dist
 	rm -rf front/dist
-	rm -rf docker/docker/app
+	rm -rf docker/app
 

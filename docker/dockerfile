@@ -6,6 +6,6 @@ RUN npm install -g --registry=https://registry.npmmirror.com cnpm && cnpm instal
 
 COPY ./app /app
 
-CMD ["node", "main.js"]
+CMD ["sh", "/app/docker_entrypoint.sh"]
 
 EXPOSE 3000 3001
