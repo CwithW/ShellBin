@@ -100,7 +100,7 @@ export default {
       this.showToast("todo...");
     },
     async toWebsocat(){
-      const text = "websocat '" + this.socket?.url + "?nohistory=1'"
+      const text = "websocat --binary '" + this.socket?.url + "?nohistory=1'"
       try {
         if (navigator.clipboard?.writeText) {
           await navigator.clipboard.writeText(text);
