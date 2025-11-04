@@ -9,6 +9,7 @@
       class="flex flex-wrap items-center gap-3 border-t border-slate-300 bg-gray-200 px-4 py-3 backdrop-blur"
     >
       <button
+        v-on:click="remoteSettings()"
         class="rounded-md bg-emerald-500 px-3 py-1.5 text-sm font-semibold text-white shadow transition-colors hover:bg-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
       >
         RemoteSettings
@@ -37,13 +38,13 @@
         @click="toClient()"
         class="rounded-md bg-slate-800 px-3 py-1.5 text-sm font-semibold text-white shadow transition-colors hover:bg-slate-700 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
       >
-        To Antsword
+        ToAntsword
       </button>
       <button
         @click="toWebsocat()"
         class="rounded-md bg-slate-800 px-3 py-1.5 text-sm font-semibold text-white shadow transition-colors hover:bg-slate-700 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
       >
-        To Websocat
+        ToWebsocat
       </button>
     </div>
     <transition
@@ -56,9 +57,9 @@
     >
       <div
         v-if="toast.visible"
-        class="pointer-events-none fixed bottom-6 right-6 rounded-xl bg-indigo-600/90 px-4 py-3 text-base font-semibold text-white shadow-xl backdrop-blur"
+        class="pointer-events-auto fixed bottom-6 right-6 rounded-xl bg-indigo-600/90 px-4 py-3 text-base font-semibold text-white shadow-xl backdrop-blur"
+        v-html="toast.message"
       >
-        {{ toast.message }}
       </div>
     </transition>
   </div>
@@ -95,6 +96,9 @@ export default {
     }
   },
   methods: {
+    remoteSettings(){
+      this.showToast("todo...");
+    },
     async toWebsocat(){
       const text = "websocat '" + this.socket?.url + "?nohistory=1'"
       try {
@@ -119,6 +123,7 @@ export default {
     },
     async toClient(){
       const text = this.getBackendHost() + "/api/webshell/" + this.id + "";
+      const copiedToast = "Copied. <a href='" + "https://github.com/CwithW/ShellBin/antsword-usage.md" + "' target='_blank' class='underline'>Usage?</a>"
       try {
         if (navigator.clipboard?.writeText) {
           await navigator.clipboard.writeText(text);
@@ -128,11 +133,11 @@ export default {
             throw new Error("execCommand failed");
           }
         }
-        this.showToast("Copied");
+        this.showToast(copiedToast);
       } catch (error) {
         const fallbackCopied = this.copyUsingExecCommand(text);
         if (fallbackCopied) {
-          this.showToast("Copied");
+          this.showToast(copiedToast);
           return;
         }
         this.showToast("Copy failed");

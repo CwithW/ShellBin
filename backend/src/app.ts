@@ -3,11 +3,12 @@ import expressWs = require('express-ws');
 import * as md5 from 'md5';
 import { connections, findConnectionById } from './socket';
 import { getConfig } from './config';
-let app = expressWs(express()).app;
+let origApp = express();
+let app = expressWs(origApp).app;
 
 import WebSocket from 'ws';
 
-app.use(express.urlencoded())
+app.use(express.urlencoded({ limit: "50mb", extended: false }))
 app.use(express.json())
 app.use(express.static('public'));
 // cors
@@ -175,6 +176,128 @@ app.post("/api/client/:id/config", requireAuth, (req, res) => {
         "data": connection.config
     })
 })
+
+function log(...args: any[]) {
+    if (!process.env.DEBUG) return;
+    console.log(...args);
+}
+
+
+
+app.post("/api/webshell/:shell_uuid", async (req, res, next) => {
+    try {
+        const shellUuid = req.params.shell_uuid;
+
+        if(!shellUuid){
+            res.status(400).send("shell_uuid is required");
+            return;
+        }
+        if(findConnectionById(shellUuid) === undefined){
+            res.status(400).send("connection not found");
+            return;
+        }
+
+
+        const command = req.body['1'] || req.body['command'];
+
+        // osType detection
+        let osType = "linux";
+
+        if(req.headers['os']){
+            osType = req.headers['os'] as string;
+        }else if(command.startsWith("powershell") || command.startsWith("cmd")){
+            osType = "windows";
+        }
+
+        if(osType == "win") osType = "windows";
+
+        if(osType !== "windows" && osType !== "linux"){
+            res.status(400).send("unsupported os type: " + osType);
+            return;
+        }
+        
+        // Handle the shell command execution here
+        log(`Executing shell command on ${osType} with UUID ${shellUuid}`);
+        log(command);
+
+        let firstTimeout = 10000;
+        let afterDataTimeout = 500;
+        let endNeedle: null | Buffer = null;
+
+        if (osType === "windows") {
+            afterDataTimeout = 10000;
+            // parse windows command, find end needle
+            // powershell -nop -enc <base64_command>
+            const regex_for_enc = /-enc\s+([A-Za-z0-9+/=]+)/i;
+            const match = command.match(regex_for_enc);
+            if (match) {
+                const base64Command = match[1];
+                const decodedCommand = Buffer.from(base64Command, 'base64').toString('utf16le');
+                log(`Decoded PowerShell command: ${decodedCommand}`);
+                // $TAGE=[System.String]::Concat('9b91','a35a4');
+                const regex_for_endNeedle = /\$TAGE=\[System.String\]::Concat\('([A-Za-z0-9]+)','([A-Za-z0-9]+)'\);/i;
+                const endNeedleMatch = decodedCommand.match(regex_for_endNeedle);
+                if (endNeedleMatch) {
+                    endNeedle = Buffer.from(endNeedleMatch[1] + endNeedleMatch[2], 'utf8');
+                    log(`Extracted endNeedle: ${endNeedle}`);
+                }
+            }
+        } else if (osType === "linux") {
+            afterDataTimeout = 10000;
+            // TAGE="e389a2""1f7653";
+            const regex_for_endNeedle = /TAGE="([a-fA-F0-9]+)""([a-fA-F0-9]+)";/i;
+            const endNeedleMatch = command.match(regex_for_endNeedle);
+            if (endNeedleMatch) {
+                endNeedle = Buffer.from(endNeedleMatch[1] + endNeedleMatch[2], 'utf8');
+                log(`Extracted endNeedle: ${endNeedle}`);
+            }
+        }
+
+        const wsPath = 'http://127.0.0.1:3000' + "/api/client/" + shellUuid + "?nohistory=1";
+        const result = await new Promise((resolve, reject) => {
+            const ws = new WebSocket(wsPath);
+            let buffer = Buffer.alloc(0);
+            function end() {
+                ws.close();
+                if (buffer.length > 0) {
+                    resolve(buffer);
+                } else {
+                    reject(new Error("No data received"));
+                }
+            }
+            let timeout = setTimeout(end, firstTimeout);
+            ws.on('open', () => {
+                log('WebSocket connection opened');
+                ws.send(command + "\n");
+            });
+
+            ws.on('message', (message) => {
+                log(`Received message: ${message}`);
+                const messageBuffer = message as Buffer;
+                buffer = Buffer.concat([buffer, messageBuffer]);
+                if (endNeedle != null) {
+                    if (buffer.includes(endNeedle)) {
+                        log('End needle detected, ending data collection');
+                        clearTimeout(timeout);
+                        end();
+                    }
+                } else {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(end, afterDataTimeout);
+                }
+            });
+
+            ws.on('error', (error) => {
+                log(`WebSocket error: ${error}`);
+                reject(error);
+            });
+        }) as Buffer;
+
+        res.end(result);
+    } catch (e) {
+        next(e);
+    }
+});
 
 export function start() {
     app.listen(3000, () => {
