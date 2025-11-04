@@ -1,50 +1,68 @@
 <template>
-  <div class="about">
-    <div class="console" id="terminal" ref="terminal"></div>
-    <div class="options">
-      <button>RemoteSettings</button>
-      <label><input type="checkbox" v-model="config.sendSttyOnResize"/>SendSttyOnResize</label>
-      <button @click="gainPty()">GainPty</button>
-      <button @click="setSttySize()">SetSttySize</button>
+  <div class="flex h-screen w-screen flex-col overflow-hidden bg-slate-100 text-slate-900">
+    <div
+      id="terminal"
+      ref="terminal"
+      class="min-h-0 flex-1 w-full overflow-hidden border-t border-slate-300 bg-black"
+    ></div>
+    <div
+      class="flex flex-wrap items-center gap-3 border-t border-slate-300 bg-gray-200 px-4 py-3 backdrop-blur"
+    >
+      <button
+        class="rounded-md bg-emerald-500 px-3 py-1.5 text-sm font-semibold text-white shadow transition-colors hover:bg-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+      >
+        RemoteSettings
+      </button>
+      <label class="flex items-center gap-2 text-sm font-medium text-slate-700 select-none">
+        <input
+          type="checkbox"
+          v-model="config.sendSttyOnResize"
+          class="h-4 w-4 rounded border border-slate-300 bg-gray-200 text-emerald-500 focus:ring-emerald-500"
+        />
+        SendSttyOnResize
+      </label>
+      <button
+        @click="gainPty()"
+        class="rounded-md bg-slate-800 px-3 py-1.5 text-sm font-semibold text-white shadow transition-colors hover:bg-slate-700 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+      >
+        GainPty
+      </button>
+      <button
+        @click="setSttySize()"
+        class="rounded-md bg-slate-800 px-3 py-1.5 text-sm font-semibold text-white shadow transition-colors hover:bg-slate-700 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+      >
+        SetSttySize
+      </button>
+      <button
+        @click="toClient()"
+        class="rounded-md bg-slate-800 px-3 py-1.5 text-sm font-semibold text-white shadow transition-colors hover:bg-slate-700 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+      >
+        To Antsword
+      </button>
+      <button
+        @click="toWebsocat()"
+        class="rounded-md bg-slate-800 px-3 py-1.5 text-sm font-semibold text-white shadow transition-colors hover:bg-slate-700 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+      >
+        To Websocat
+      </button>
     </div>
+    <transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="translate-y-2 opacity-0"
+      enter-to-class="translate-y-0 opacity-100"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="translate-y-0 opacity-100"
+      leave-to-class="translate-y-2 opacity-0"
+    >
+      <div
+        v-if="toast.visible"
+        class="pointer-events-none fixed bottom-6 right-6 rounded-xl bg-indigo-600/90 px-4 py-3 text-base font-semibold text-white shadow-xl backdrop-blur"
+      >
+        {{ toast.message }}
+      </div>
+    </transition>
   </div>
 </template>
-
-<style scoped>
-label{
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-.hidden{
-  display: none;
-}
-.about{
-  width: 100%;
-  height: 100%;
-  display:flex;
-  flex-direction: column;
-}
-.console {
-  width: 100%;
-  height: calc(100% - 20px);
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-.options {
-  width: 100%;
-  height: 20px;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  background: gainsboro;
-  overflow-x: auto;
-  display: flex;
-  flex-direction: row;
-}
-</style>
 <script lang="ts">
 import { Terminal } from 'xterm';
 import "xterm/css/xterm.css";
@@ -66,17 +84,103 @@ export default {
       windowResizeListener: undefined as (() => void)|undefined,
       fitAddon: undefined as FitAddon|undefined,
       resizeTimer: undefined as number|undefined,
+      toastTimer: undefined as number|undefined,
       config:{
         sendSttyOnResize: false,
+      },
+      toast: {
+        visible: false,
+        message: "",
       }
     }
   },
   methods: {
+    async toWebsocat(){
+      const text = "websocat '" + this.socket?.url + "?nohistory=1'"
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const copied = this.copyUsingExecCommand(text);
+          if (!copied) {
+            throw new Error("execCommand failed");
+          }
+        }
+        this.showToast("Copied");
+      } catch (error) {
+        const fallbackCopied = this.copyUsingExecCommand(text);
+        if (fallbackCopied) {
+          this.showToast("Copied");
+          return;
+        }
+        this.showToast("Copy failed");
+        console.error("copy failed", error);
+      }
+    },
+    async toClient(){
+      const text = this.getBackendHost() + "/api/webshell/" + this.id + "";
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const copied = this.copyUsingExecCommand(text);
+          if (!copied) {
+            throw new Error("execCommand failed");
+          }
+        }
+        this.showToast("Copied");
+      } catch (error) {
+        const fallbackCopied = this.copyUsingExecCommand(text);
+        if (fallbackCopied) {
+          this.showToast("Copied");
+          return;
+        }
+        this.showToast("Copy failed");
+        console.error("copy failed", error);
+      }
+    },
+    copyUsingExecCommand(text: string): boolean {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'absolute';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      const selection = document.getSelection();
+      const selected = selection?.rangeCount ? selection.getRangeAt(0) : null;
+      textarea.select();
+      let success = false;
+      try {
+        success = document.execCommand('copy');
+      } catch (err) {
+        success = false;
+      }
+      document.body.removeChild(textarea);
+      if (selected && selection) {
+        selection.removeAllRanges();
+        selection.addRange(selected);
+      }
+      return success;
+    },
+    showToast(message: string){
+      this.toast.message = message;
+      this.toast.visible = true;
+      if (this.toastTimer) {
+        clearTimeout(this.toastTimer);
+      }
+      this.toastTimer = window.setTimeout(() => {
+        this.toast.visible = false;
+        this.toast.message = "";
+      }, 2000);
+    },
+    getBackendHost(){
+      return (import.meta.env.DEV ? "http://localhost:3000" : 
+        window.location.origin
+        )
+    },
     initSocket() {
       this.socket = new WebSocket(
-        (import.meta.env.DEV ? "ws://localhost:3000" : 
-        window.location.origin.replace(/^https(.*)/, 'wss$1').replace(/^http(.*)/, 'ws$1')
-        )
+        this.getBackendHost().replace(/^http(.*)/, 'ws$1').replace(/^https(.*)/, 'wss$1')
         + "/api/client/" + this.id + "");
       this.socket.onopen = () => {
         this.initTerm();
@@ -146,6 +250,10 @@ export default {
     this.fitAddon = undefined;
     window.removeEventListener('resize', this.windowResizeListener!);
     this.windowResizeListener = undefined;
+    if (this.toastTimer) {
+      clearTimeout(this.toastTimer);
+      this.toastTimer = undefined;
+    }
   },
 }
 

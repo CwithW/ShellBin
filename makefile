@@ -6,7 +6,9 @@ backend-environment:
 backend:
 	cd backend && npm run build && cp package.json dist/package.json
 
-backend-dev:
+backend-dev: backend
+	mkdir -p backend/config
+	echo IyB0aGUgc2VjcmV0IHRvIGtlZXAgeW91ciBzZXJ2aWNlIHByaXZhdGUNCnVzZXJuYW1lOiBhZG1pbg0KcGFzc3dvcmQ6IGFkbWluDQojIHRoZSBwb3J0IHlvdSBhY2Nlc3MgdGhlIHNlcnZpY2Ugd2l0aCBIVFRQDQptYW5hZ2VQb3J0OiAzMDAwDQojIHRoZSBwb3J0IHZpY3RpbXMgY29ubmVjdCB0bw0Kc2hlbGxQb3J0OiAzMDAxDQojIGF1dG9tYXRpY2FsbHkgcmVtb3ZlIGNvbm5lY3Rpb25zIHRoYXQgYXJlIGRlYWQgWCBzZWNvbmRzIGFnby4gc2V0IHRvIDAgdG8gZGlzYWJsZQ0KIyBkZWZhdWx0IGlzIDM2MDAgc2Vjb25kcyAoMSBob3VyKQ0KcmVtb3ZlRGVhZEFmdGVyOiAzNjAw | base64 -d > backend/config/config.yml
 	cd backend && npm run dev
 
 front-environment:
