@@ -3,3 +3,5 @@ node_modules
 dist
 
 /docker/app
+
+package-lock.json

@@ -2,7 +2,7 @@ FROM node:lts-alpine
 
 COPY ./app/package.json /app/package.json
 WORKDIR /app
-RUN npm install -g --registry=https://registry.npmmirror.com cnpm && cnpm install
+RUN npm install && npm cache clean --force
 
 COPY ./app /app
 
