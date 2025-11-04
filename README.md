@@ -9,15 +9,22 @@ Receive multiple reverse shells on one port, and manage them in a web UI.
 With the usage of [xterm.js](https://xtermjs.org/), complex commands like vi, tmux and Ctrl-C works ( you may need to gain pty, and set correct stty size. )
 
 ![Web-based reverse shell management](docs/screenshot-1.png)
+Web-based reverse shell management.
+
 ![Convert reverse shell into antsword webshell](docs/screenshot-2.png)
+Convert reverse shell into antsword webshell.
 
 ## Running
 
 Recommended to use the [docker image from dockerhub](https://hub.docker.com/repository/docker/cwithw/shellbin).
 
+start via one-liner docker run:
+
 ```bash
 docker run -d --name shellbin -p 9998:3000 -p 9999:3001 -e USERNAME=root -e PASSWORD=toor cwithw/shellbin:latest
 ```
+
+or [docker compose](docker-compose.yml.gen).
 
 Change the value of `USERNAME` and `PASSWORD` to your own username and password. 
 You may also change `9998`(web UI port) and `9999`(reverse shell port) to your own port.

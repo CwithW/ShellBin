@@ -1,0 +1,12 @@
+services:
+  shellbin:
+    image: cwithw/shellbin:latest
+    ports:
+      - "9998:3000"
+      - "9999:3001"
+    environment:
+      - NODE_ENV=production
+      - TZ=Asia/Shanghai
+      - USERNAME=root
+      - PASSWORD=toor
+    restart: unless-stopped

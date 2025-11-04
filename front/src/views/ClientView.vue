@@ -123,7 +123,7 @@ export default {
     },
     async toClient(){
       const text = this.getBackendHost() + "/api/webshell/" + this.id + "";
-      const copiedToast = "Copied. <a href='" + "https://github.com/CwithW/ShellBin/antsword-usage.md" + "' target='_blank' class='underline'>Usage?</a>"
+      const copiedToast = "Copied. <a href='" + "https://github.com/CwithW/ShellBin/blob/main/antsword-usage.md" + "' target='_blank' class='underline'>Usage?</a>"
       try {
         if (navigator.clipboard?.writeText) {
           await navigator.clipboard.writeText(text);
