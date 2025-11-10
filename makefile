@@ -29,12 +29,10 @@ docker: clean backend front
 
 VERSION:=$(shell cat version)
 build-docker-image: docker
-	docker build -t "cwithw/shellbin:$(VERSION)" docker
-	docker tag "cwithw/shellbin:$(VERSION)" "cwithw/shellbin:latest"
+	docker build -t "cwithw/shellbin:demosite" docker
 
 push-docker: build-docker-image
-	docker push "cwithw/shellbin:$(VERSION)"
-	docker push "cwithw/shellbin:latest"
+	docker push "cwithw/shellbin:demosite"
 
 
 clean:

@@ -11,7 +11,7 @@
 export default {
   name: 'Index',
   mounted() {
-    let token = localStorage.getItem('token')
+    let token = true
     if(!token) {
       this.$router.push('/login')
     } else {

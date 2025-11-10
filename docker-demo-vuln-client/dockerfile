@@ -1,0 +1,30 @@
+# 1. 使用 Ubuntu 22.04 (Jammy Jellyfish) 作为基础镜像
+FROM ubuntu:22.04
+
+# 2. 设置环境变量
+#    - DEBIAN_FRONTEND=noninteractive: 防止 apt-get 在构建过程中弹出交互式提示
+#    - PYTHONUNBUFFERED=1: 确保 Python 的 print() 输出能立即显示在容器日志中
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+
+# 3. 安装 Python 和常用工具
+#    - 运行 apt-get update 更新包列表
+#    - -y 标志表示自动对所有提示回答“是”
+#    - python3: Python 3 解释器
+#    - python3-pip: Python 的包管理器
+#    - python-is-python3: 创建一个 'python' 到 'python3' 的软链接
+#    - git, curl, build-essential: 开发中常用的工具
+#    - 最后清理 apt 缓存，以减小镜像体积
+RUN apt-get update && \
+    apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-venv \
+    python-is-python3 \
+    git \
+    curl \
+    build-essential \
+    screen tmux vim \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+

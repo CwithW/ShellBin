@@ -3,6 +3,12 @@
     <div class="mx-auto max-w-4xl space-y-8">
       <header class="space-y-2">
         <h1 class="text-3xl font-semibold tracking-tight text-slate-950">Shell Connections</h1>
+        <p class="text-sm text-slate-500"><a href="https://github.com/CwithW/ShellBin" target="_blank"
+            style="display: inline-block;">
+            <img src="https://img.shields.io/badge/GitHub-ShellBin-black?logo=github" alt="GitHub Repo">
+          </a></p>
+        <p class="text-sm text-slate-500">此演示站点自带一个来自ubuntu:22.04容器的shell，便于用户测试ShellBin相关功能。</p>
+        <p class="text-sm text-slate-500">根据中国互联网安全审计要求，此演示站点不接受来自外部网络的反向Shell请求，并且不能访问外部互联网。</p>
         <p class="text-sm text-slate-500">Click a shell to open its terminal viewer in a new window.</p>
       </header>
 
@@ -18,22 +24,15 @@
         </div>
 
         <div v-if="clients.length" class="divide-y divide-slate-200">
-          <button
-            v-for="client in clients"
-            :key="client.id"
-            type="button"
-            @click="clickedOn(client)"
-            class="flex w-full items-center justify-between gap-4 px-6 py-4 text-left transition hover:bg-slate-100"
-          >
+          <button v-for="client in clients" :key="client.id" type="button" @click="clickedOn(client)"
+            class="flex w-full items-center justify-between gap-4 px-6 py-4 text-left transition hover:bg-slate-100">
             <div class="min-w-0">
               <p class="truncate text-sm font-medium text-slate-900">{{ client.description || 'Untitled client' }}</p>
               <p class="text-xs text-slate-500">Last active: {{ unixTimeToDate(client.lastActive) }}</p>
             </div>
 
-            <span
-              class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold"
-              :class="client.alive ? 'bg-emerald-100 text-emerald-700 ring-1 ring-inset ring-emerald-200' : 'bg-rose-100 text-rose-700 ring-1 ring-inset ring-rose-200'"
-            >
+            <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold"
+              :class="client.alive ? 'bg-emerald-100 text-emerald-700 ring-1 ring-inset ring-emerald-200' : 'bg-rose-100 text-rose-700 ring-1 ring-inset ring-rose-200'">
               <span class="h-2 w-2 rounded-full" :class="client.alive ? 'bg-emerald-500' : 'bg-rose-500'"></span>
               {{ client.alive ? 'Alive' : 'Dead' }}
             </span>
@@ -76,7 +75,7 @@ export default {
     clickedOn(client: Client) {
       // start a popop page that shows the terminal
       window.open("/#/client/" + client.id, "_blank", "width=800,height=600");
-      
+
     }
   },
   mounted() {

