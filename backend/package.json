@@ -8,6 +8,7 @@
     "express": "^4.18.2",
     "express-ws": "^5.0.2",
     "md5": "^2.3.0",
+    "typescript": "5.0.4",
     "uuid": "^9.0.0",
     "ws": "^8.18.3",
     "yaml": "^2.3.1"
@@ -16,7 +17,7 @@
   "version": "1.0.0",
   "main": "dist/main.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "npx tsc",
     "dev": "node dist/main.js"
   },
   "author": "",

