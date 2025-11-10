@@ -1,6 +1,6 @@
 # ShellBin
 
-[中文文档](README_zh.md)
+[中文文档（通过谷歌翻译）](https://github-com.translate.goog/CwithW/ShellBin/blob/main/README.md?_x_tr_sl=auto&_x_tr_tl=zh-CN&_x_tr_hl=zh-CN&_x_tr_pto=wapp)
 
 Elegantly receive reverse shell.
 
