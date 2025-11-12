@@ -2,6 +2,8 @@
 
 [中文文档（通过谷歌翻译）](https://github-com.translate.goog/CwithW/ShellBin/blob/main/README.md?_x_tr_sl=auto&_x_tr_tl=zh-CN&_x_tr_hl=zh-CN&_x_tr_pto=wapp)
 
+[Demo Site](https://shellbin-demo.chara.pub/)
+
 Elegantly receive reverse shell.
 
 Receive multiple reverse shells on one port, and manage them in a web UI.
